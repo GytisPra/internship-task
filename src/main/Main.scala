@@ -7,8 +7,6 @@ import java.awt.geom.Point2D;
 import os.write.append
 import ujson.Arr
 import ujson.Obj
-import scala.collection.mutable.ArrayBuffer
-import scala.compiletime.ops.double
 
 case class Location(val name: String, val coordinates: (Double, Double))
     derives Reader
@@ -93,6 +91,20 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
 
   os.write.append(resPath, write[List[Result]](results))
 
+/**
+  * Checks if a location is inside a given list of polygons
+  * 
+  * I am using the Java geom.Path2D and geom.Point2D libraries.
+  * First we create the polygon, then create a test point using the
+  * provided location and call the method ```contains``` to check if the
+  * location is inside.
+  * 
+  * Got this from: https://www.geeksforgeeks.org/dsa/how-to-check-if-a-given-point-lies-inside-a-polygon/
+  *
+  * @param location The location to check
+  * @param polygons A list of polygons
+  * @return True if inside; False otherwise
+  */
 def locationInPolygons(location: Location, polygons: List[Polygon]): Boolean =
   val path: Path2D    = new Path2D.Double
   var locationMatched = false

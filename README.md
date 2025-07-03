@@ -1,9 +1,6 @@
-# How to launch
+### Usage
 
-Type this command in the terminal:
-```bash
-scala run ./main.scala -- regions=regions.json locations=locations.json output=my_results.json
-```
+`scala run ./src/main/main.scala -- regions=regions.json locations=locations.json output=my_results.json`
 
 # internship-task
 
