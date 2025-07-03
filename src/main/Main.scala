@@ -4,8 +4,9 @@ import upickle.default.*
 import upickle.implicits.key
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import os.write.append
+import os.write
 import ujson.Arr
+import ujson.Value
 import ujson.Obj
 
 case class Location(val name: String, val coordinates: (Double, Double))
@@ -17,11 +18,11 @@ case class Region(
 )
 
 implicit val regionReader: Reader[Region] =
-  reader[ujson.Value].map[Region] {
-    case ujson.Obj(json) =>
+  reader[Value].map[Region] {
+    case Obj(json) =>
       val name     = json("name").str
       val polygons = read[List[Polygon]](json("coordinates"))
-      new Region(name = name, polygons)
+      new Region(name, polygons)
     case other           =>
       throw new Error(
         s"error while trying to read regions exptected name and List(List(List())) got: $other"
@@ -31,8 +32,8 @@ implicit val regionReader: Reader[Region] =
 case class Polygon(val points: List[(Double, Double)])
 
 implicit val polygonsListReader: Reader[List[Polygon]] =
-  reader[ujson.Value].map[List[Polygon]] {
-    case ujson.Arr(polygonsArr) =>
+  reader[Value].map[List[Polygon]] {
+    case Arr(polygonsArr) =>
       polygonsArr.toList
         .map {
           case Arr(value) =>
@@ -63,6 +64,8 @@ case class Result(val region: String, var matchedLocations: Seq[String])
 
 @main
 def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
+  // I am guessing this is bad because the user doesn't know in what order they should input stuff
+  // so maybe replacing this with args array and then from there finding the paths would be better?
   val locInputPath =
     os.pwd / "input" / locationsPath.stripPrefix("locations=")
   val regInputPath =
@@ -89,7 +92,7 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
 
   if os.exists(resPath) then os.remove(resPath)
 
-  os.write.append(resPath, write[List[Result]](results))
+  os.write(resPath, upickle.default.write[List[Result]](results))
 
 /**
   * Checks if a location is inside a given list of polygons
