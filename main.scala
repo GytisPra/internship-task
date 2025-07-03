@@ -31,11 +31,6 @@ implicit val regionReader: Reader[Region] =
   }
 
 case class Polygon(val points: List[(Double, Double)])
-  // def formEdges(): List[(Double, Double, Double, Double)] =
-  //   points.map(point => point match {
-  //     case ((x1, y1), (x2, y2)) => (x1, y1, x2, y2)
-  //   })
-  //   }
 
 implicit val polygonsListReader: Reader[List[Polygon]] =
   reader[ujson.Value].map[List[Polygon]] {
