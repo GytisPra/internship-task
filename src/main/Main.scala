@@ -8,6 +8,7 @@ import os.write
 import ujson.Arr
 import ujson.Value
 import ujson.Obj
+import scala.compiletime.ops.double
 
 case class Location(val name: String, val coordinates: (Double, Double))
     derives Reader
@@ -23,7 +24,7 @@ implicit val regionReader: Reader[Region] =
       val name     = json("name").str
       val polygons = read[List[Polygon]](json("coordinates"))
       new Region(name, polygons)
-    case other           =>
+    case other     =>
       throw new Error(
         s"error while trying to read regions exptected name and List(List(List())) got: $other"
       )
@@ -49,18 +50,14 @@ implicit val polygonsListReader: Reader[List[Polygon]] =
           case other      => throw new Error(s"Expected Arr(value) got: $other")
         }
         .map(Polygon(_))
-    case other                  =>
+    case other            =>
       throw new Error(
         s"error while trying to read polygons exptected Arr(value) got: $other"
       )
   }
 
-case class Result(val region: String, var matchedLocations: Seq[String])
-    derives Writer:
-  def appendLocation(
-      location: String
-  ): Unit = // Should not be doing this with a mutable list
-    this.matchedLocations = this.matchedLocations :+ location
+case class Result(val region: String, val matchedLocations: List[String])
+    derives Writer
 
 @main
 def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
@@ -75,38 +72,64 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
 
   val regions: List[Region]     = read[List[Region]](os.read(regInputPath))
   val locations: List[Location] = read[List[Location]](os.read(locInputPath))
-  var results: List[Result]     = List()
 
-  val result = for 
-    region <- regions  
+  val result = for
+    region   <- regions
     location <- locations
     if locationInPolygons(location, region.polygons)
   yield (region.name, location.name)
+
   // This for-yield outputs List((region1, location1), (region1, location2), ...)
   // I need a way to group the results by the region name so that I get List((region1, List(...matchedLocations...)))
   // and also for example region3 has no matched locations so I would like to have List(..., (region3, List()))
 
-  val test = result.groupBy(result => result._1)
-  println(test)
-    
+  val groupedAndTransformedResults = result
+    .groupBy(r => r._1) // Group by the region name
+    .transform((key, value) => // transfrom
+      value.map { case (regionName, locationName) =>
+        locationName
+      }
+    )
+    .map { // pattern match map the values to the class Result
+      case (regionName, matchedLocations) =>
+        Result(regionName, matchedLocations)
+    }
+    .toList
 
   if os.exists(resPath) then os.remove(resPath)
 
-  os.write(resPath, upickle.default.write[List[Result]](results))
+  regions.foreach(region =>
+    val result =
+      groupedAndTransformedResults.find(_.region == region.name) match {
+        case None        => Result(region.name, List())
+        case Some(value) => value
+      }
 
-/**
-  * Checks if a location is inside a given list of polygons
-  * 
-  * I am using the Java geom.Path2D and geom.Point2D libraries.
-  * First we create the polygon, then create a test point using the
-  * provided location and call the method ```contains``` to check if the
-  * location is inside.
-  * 
-  * Got this from: https://www.geeksforgeeks.org/dsa/how-to-check-if-a-given-point-lies-inside-a-polygon/
+      // I can't write these results one by one because then the json format is bad
+      // I need to somewhow collect these into a List
+  )
+
+  // os.write(
+  //   resPath,
+  //   upickle.default
+  //     .write[List[Result]](result)
+  // )
+
+/** Checks if a location is inside a given list of polygons
   *
-  * @param location The location to check
-  * @param polygons A list of polygons
-  * @return True if inside; False otherwise
+  * I am using the Java geom.Path2D and geom.Point2D libraries. First we create
+  * the polygon, then create a test point using the provided location and call
+  * the method ```contains``` to check if the location is inside.
+  *
+  * Got this from:
+  * https://www.geeksforgeeks.org/dsa/how-to-check-if-a-given-point-lies-inside-a-polygon/
+  *
+  * @param location
+  *   The location to check
+  * @param polygons
+  *   A list of polygons
+  * @return
+  *   True if inside; False otherwise
   */
 def locationInPolygons(location: Location, polygons: List[Polygon]): Boolean =
   val path: Path2D    = new Path2D.Double
