@@ -3,5 +3,6 @@
   {
     "region": "region2",
     "matchedLocations": ["location3", "location4", "location5"]
-  }
+  },
+  { "region": "region3", "matchedLocations": [] }
 ]

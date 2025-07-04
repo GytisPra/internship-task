@@ -34,6 +34,7 @@ case class Polygon(val points: List[(Double, Double)])
 
 implicit val polygonsListReader: Reader[List[Polygon]] =
   reader[Value].map[List[Polygon]] {
+    // There must be a better way to do this
     case Arr(polygonsArr) =>
       polygonsArr.toList
         .map {
@@ -73,7 +74,7 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
   val regions: List[Region]     = read[List[Region]](os.read(regInputPath))
   val locations: List[Location] = read[List[Location]](os.read(locInputPath))
 
-  val result = for
+  val results = for
     region   <- regions
     location <- locations
     if locationInPolygons(location, region.polygons)
@@ -83,7 +84,7 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
   // I need a way to group the results by the region name so that I get List((region1, List(...matchedLocations...)))
   // and also for example region3 has no matched locations so I would like to have List(..., (region3, List()))
 
-  val groupedAndTransformedResults = result
+  val groupedAndTransformedResults = results
     .groupBy(r => r._1) // Group by the region name
     .transform((key, value) => // transfrom
       value.map { case (regionName, locationName) =>
@@ -98,22 +99,18 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
 
   if os.exists(resPath) then os.remove(resPath)
 
-  regions.foreach(region =>
-    val result =
-      groupedAndTransformedResults.find(_.region == region.name) match {
-        case None        => Result(region.name, List())
-        case Some(value) => value
-      }
-
-      // I can't write these results one by one because then the json format is bad
-      // I need to somewhow collect these into a List
+  val fullResults = regions.map(region =>
+    groupedAndTransformedResults.find(_.region == region.name) match {
+      case None        => Result(region.name, List())
+      case Some(value) => value
+    }
   )
 
-  // os.write(
-  //   resPath,
-  //   upickle.default
-  //     .write[List[Result]](result)
-  // )
+  os.write(
+    resPath,
+    upickle.default
+      .write[List[Result]](fullResults)
+  )
 
 /** Checks if a location is inside a given list of polygons
   *
@@ -132,19 +129,18 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
   *   True if inside; False otherwise
   */
 def locationInPolygons(location: Location, polygons: List[Polygon]): Boolean =
-  val path: Path2D    = new Path2D.Double
-  var locationMatched = false
+  polygons
+    .map(polygon =>
+      val path: Path2D = new Path2D.Double
+      path.moveTo(polygon.points.head._1, polygon.points.head._2)
 
-  for polygon <- polygons do
-    path.moveTo(polygon.points.head._1, polygon.points.head._2)
+      polygon.points.drop(1).map(point => path.lineTo(point._1, point._2))
 
-    polygon.points.drop(1).map(point => path.lineTo(point._1, point._2))
+      path.closePath()
 
-    path.closePath()
+      val testPoint: Point2D =
+        new Point2D.Double(location.coordinates._1, location.coordinates._2)
 
-    val testPoint: Point2D =
-      new Point2D.Double(location.coordinates._1, location.coordinates._2)
-
-    if path.contains(testPoint) then locationMatched = true
-
-  return locationMatched
+      path.contains(testPoint)
+    )
+    .find(_ == true) != None
