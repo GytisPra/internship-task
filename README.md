@@ -1,6 +1,8 @@
 ### Usage
 
-`scala run ./src/main/main.scala -- regions=regions.json locations=locations.json output=my_results.json`
+```bash
+sbt "run regions=regions.json locations=locations.json output=results.json"
+```
 
 # internship-task
 
