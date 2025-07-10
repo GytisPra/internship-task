@@ -1,5 +1,6 @@
 import upickle.default.{write, read}
 import os.write as osWrite
+import os.Path
 import ujson.{Arr, Value, Obj}
 import java.io.FileNotFoundException
 
@@ -7,24 +8,34 @@ import Models.*
 import Utils.GeoUtils
 
 @main
-def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
-  // I am guessing this is bad because the user doesn't know in what order they should input stuff
-  // so maybe replacing this with args array and then from there finding the paths would be better?
-  val locInputPath =
-    os.pwd / "input" / locationsPath.stripPrefix("locations=")
-  val regInputPath =
-    os.pwd / "input" / regionsPath.stripPrefix("regions=")
-  var resPath      =
-    os.pwd / "output" / outputPath.stripPrefix("output=")
+def main(args: String*): Unit =
+  var paths: Map[String, Path] = Map()
 
-  if !os.exists(locInputPath) then
-    throw FileNotFoundException(s"$locInputPath does not exist")
+  args.map(arg =>
+    arg match
+      case value if value.contains("regions=")   =>
+        val path = os.pwd / "input" / arg.stripPrefix("regions=")
+        paths += ("regions" -> path)
+      case value if value.contains("locations=") =>
+        val path = os.pwd / "input" / arg.stripPrefix("locations=")
+        paths += ("locations" -> path)
+      case value if value.contains("output=")    =>
+        val path = os.pwd / "output" / arg.stripPrefix("output=")
+        paths += ("output" -> path)
+      case other                                 =>
+        println(s"Unknown argument provided $other")
+        System.exit(1)
+  )
 
-  if !os.exists(regInputPath) then
-    throw FileNotFoundException(s"$regInputPath does not exist")
+  if !os.exists(paths("locations")) then
+    throw FileNotFoundException(s"${paths("locations")} does not exist")
 
-  val regions: List[Region]     = read[List[Region]](os.read(regInputPath))
-  val locations: List[Location] = read[List[Location]](os.read(locInputPath))
+  if !os.exists(paths("regions")) then
+    throw FileNotFoundException(s"${paths("regions")} does not exist")
+
+  val regions: List[Region]     = read[List[Region]](os.read(paths("regions")))
+  val locations: List[Location] =
+    read[List[Location]](os.read(paths("locations")))
 
   val unformattedResults = for
     region   <- regions
@@ -34,4 +45,6 @@ def main(regionsPath: String, locationsPath: String, outputPath: String): Unit =
 
   val results = formatResults(regions, unformattedResults)
 
-  osWrite(resPath, write[List[Result]](results))
+  if os.exists(paths("output")) then os.remove(paths("output"))
+
+  osWrite(paths("output"), write[List[Result]](results))
