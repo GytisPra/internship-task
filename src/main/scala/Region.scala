@@ -2,10 +2,7 @@ package Models
 
 import Models.Polygon
 
-case class Region(
-    val name: String,
-    val polygons: List[Polygon]
-)
+case class Region(val name: String, val polygons: List[Polygon])
 
 object Region {
   import upickle.default.{reader, read, Reader}

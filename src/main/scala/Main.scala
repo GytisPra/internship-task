@@ -7,6 +7,8 @@ import java.io.FileNotFoundException
 import Models.*
 import Utils.GeoUtils
 
+// TODO: Read the articles attached in the email and see if I can make any improvements
+
 @main
 def main(args: String*): Unit =
   var paths: Map[String, Path] = Map()
@@ -34,8 +36,7 @@ def main(args: String*): Unit =
     throw FileNotFoundException(s"${paths("regions")} does not exist")
 
   val regions: List[Region]     = read[List[Region]](os.read(paths("regions")))
-  val locations: List[Location] =
-    read[List[Location]](os.read(paths("locations")))
+  val locations: List[Location] = read[List[Location]](os.read(paths("locations")))
 
   val unformattedResults = for
     region   <- regions

@@ -2,9 +2,7 @@ package Models
 
 case class Polygon(val points: List[(Double, Double)]):
   def getEdges(): List[(Double, Double, Double, Double)] =
-    points zip (points.tail :+ points.head) map { case ((x1, y1), (x2, y2)) =>
-      (x1, y1, x2, y2)
-    }
+    points zip (points.tail :+ points.head) map { case ((x1, y1), (x2, y2)) => (x1, y1, x2, y2) }
 
 object Polygon {
   import upickle.default.{reader, macroR, Reader}
