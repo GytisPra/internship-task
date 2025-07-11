@@ -1,12 +1,12 @@
-package Utils
+package com.internshiptask.Utils
 
-import Models.{Location, Polygon}
+import com.internshiptask.Models.{Location, Polygon}
 
 object GeoUtils {
 
   /** Checks if a given location is inside any provided polygon
     *
-    * This is implement using the ray casting algorithm. We take our location and cast a ray to the
+    * This is done using the ray casting algorithm. We take our location and cast a ray to the
     * right side of it to infinty. Now we can imangine what happens when a point is outside of a
     * polygon, the ray will first enter the polygon and then exit so it intersects an even number of
     * times, however if the point is inside the polygon then it will only exit intersecting, an odd
@@ -32,17 +32,17 @@ object GeoUtils {
       polygon: Polygon
   ): Boolean =
     val edges    = polygon.getEdges()
-    val (xl, yl) = location.coordinates
+    val (xl, yl) = (location.coordinates.x, location.coordinates.y)
 
     // check if the location is on an edge
-    if edges.exists((x1, y1, x2, y2) => xl >= x1 && xl <= x2 && yl >= y1 && yl <= y2) then true
+    if edges.exists((p1, p2) => xl >= p1.x && xl <= p2.x && yl >= p1.y && yl <= p2.y) then true
     else
       edges
-        .map((x1, y1, x2, y2) =>
-          // (yl < y1) != (yl < y2) Checks if the given location is not above or belove an edge
-          // x1 + ((yl - y1) / (y2 - y1)) * (x2 - x1) calculates the intersection point, 
+        .map((p1, p2) =>
+          // (yl < p1.y) != (yl < p2.y) Checks if the given location is not above or belove an edge
+          // p1.x + ((yl - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) calculates the intersection point, 
           // then we check if the location is to the left of the intersection
-          if (yl < y1) != (yl < y2) && xl < x1 + ((yl - y1) / (y2 - y1)) * (x2 - x1) then 1
+          if (yl < p1.y) != (yl < p2.y) && xl < p1.x + ((yl - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) then 1
           else 0
         )
         .foldLeft(0)(_ + _) % 2 == 1

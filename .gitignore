@@ -32,3 +32,6 @@ metals.sbt
 /.worksheet/
 
 .scala-build
+
+#output
+output/*.json
