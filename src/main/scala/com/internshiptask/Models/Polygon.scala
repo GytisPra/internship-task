@@ -8,8 +8,23 @@ object Polygon {
   import upickle.default.{reader, read, Reader}
   import ujson.{Arr}
 
-  implicit val polygonReader: Reader[Polygon] = reader[Arr].map[Polygon](coordinates =>
-    val points = read[List[Point]](coordinates)
-    Polygon(points)
-  )
+  implicit val polygonReader: Reader[Either[String, Polygon]] =
+    reader[Arr].map[Either[String, Polygon]](coordinates =>
+      val points = read[List[Either[String, Point]]](coordinates)
+
+      val errors = points.map {
+        case Left(error) => Some(error)
+        case Right(point) => None
+      }.flatten
+
+      val validPoints = points.map {
+        case Left(error) => None
+        case Right(value) => Some(value)
+      }.flatten
+
+      if errors.length > 0 then
+        Left(s"error occured while parsing points: $errors")
+      else
+        Right(Polygon(validPoints))
+    )
 }
