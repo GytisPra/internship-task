@@ -7,14 +7,13 @@ import java.nio.file.NotDirectoryException
 import com.internshiptask.Utils.{GeoUtils, ResultUtils}
 import com.internshiptask.Models.{Location, Region, Result}
 import com.internshiptask.Extensions.ArgsExtensions.getPath
-import scala.util.Try
-import scala.util.Failure
-import scala.util.Success
 
 @main
 def main(args: String*): Unit =
   val inputDir  = "input"
   val outputDir = "output"
+
+  if !os.exists(os.pwd / outputDir) then os.makeDir(os.pwd / outputDir)
 
   val regionsPath = args.getPath(prefix = "regions=", dir = inputDir) match {
     case Left(exception) => throw exception
