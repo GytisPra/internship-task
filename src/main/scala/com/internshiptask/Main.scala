@@ -16,9 +16,20 @@ def main(args: String*): Unit =
   val inputDir  = "input"
   val outputDir = "output"
 
-  val regionsPath   = args.getPath(prefix = "regions=", dir = inputDir)
-  val locationsPath = args.getPath(prefix = "locations=", dir = inputDir)
-  val outputPath    = args.getPath(prefix = "output=", dir = outputDir)
+  val regionsPath = args.getPath(prefix = "regions=", dir = inputDir) match {
+    case Left(exception) => throw exception
+    case Right(path)     => path
+  }
+
+  val locationsPath = args.getPath(prefix = "locations=", dir = inputDir) match {
+    case Left(exception) => throw exception
+    case Right(path)     => path
+  }
+
+  val outputPath = args.getPath(prefix = "output=", dir = outputDir) match {
+    case Left(exception) => throw exception
+    case Right(path)     => path
+  }
 
   val regions   = read[Either[String, List[Region]]](os.read(regionsPath)) match {
     case Left(error)    => throw new Exception(error)

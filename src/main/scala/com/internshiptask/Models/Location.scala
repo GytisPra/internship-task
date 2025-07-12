@@ -1,11 +1,11 @@
 package com.internshiptask.Models
 
-import upickle.default.{Reader, reader, read}
-import ujson.{Value, Obj, Arr}
-
 case class Location(val name: String, val coordinates: Point)
 
 object Location {
+  import upickle.default.{Reader, reader, read}
+  import ujson.{Value, Obj, Arr}
+
   implicit val locationReader: Reader[Either[String, Location]] =
     reader[Value].map[Either[String, Location]](json =>
       val name = json("name").str
