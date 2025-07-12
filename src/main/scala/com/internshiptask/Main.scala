@@ -6,26 +6,23 @@ import java.nio.file.NotDirectoryException
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils}
 import com.internshiptask.Models.{Location, Region, Result}
-import com.internshiptask.Extensions.ArgsExtensions.getPath
+import com.internshiptask.Extensions.ArgsExtensions.{getOutputPath, getInputPath}
 
 @main
 def main(args: String*): Unit =
-  val inputDir  = "input"
-  val outputDir = "output"
+  if !os.exists(os.pwd / "output") then os.makeDir(os.pwd / "output")
 
-  if !os.exists(os.pwd / outputDir) then os.makeDir(os.pwd / outputDir)
-
-  val regionsPath = args.getPath(prefix = "regions=", dir = inputDir) match {
+  val regionsPath = args.getInputPath(prefix = "regions=") match {
     case Left(exception) => throw exception
     case Right(path)     => path
   }
 
-  val locationsPath = args.getPath(prefix = "locations=", dir = inputDir) match {
+  val locationsPath = args.getInputPath(prefix = "locations=") match {
     case Left(exception) => throw exception
     case Right(path)     => path
   }
 
-  val outputPath = args.getPath(prefix = "output=", dir = outputDir) match {
+  val outputPath = args.getOutputPath(prefix = "output=") match {
     case Left(exception) => throw exception
     case Right(path)     => path
   }
