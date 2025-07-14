@@ -13,7 +13,7 @@ object Polygon {
       val result           = read[List[Either[String, Point]]](coordinates)
       val (errors, points) = result.partitionMap(identity)
 
-      if errors.nonEmpty then Left(s"error occured while parsing polygon: $errors")
+      if errors.nonEmpty then Left(s"error occured while parsing polygon: ${errors.mkString(", ")}")
       else Right(Polygon(points))
     )
 }

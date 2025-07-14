@@ -1,12 +1,8 @@
-import collection.mutable.Stack
-import upickle.default._
+import upickle.default.read
 import org.scalatest.funsuite.AnyFunSuite
 
 import com.internshiptask.Models.{Polygon, Location, Point, Region}
 import com.internshiptask.Utils.GeoUtils
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.Inside
-import org.scalatest.matchers.should.Matchers
 
 class CustomPicklersTest extends AnyFunSuite {
   test("point reader should parse correct JSON with no errors") {
@@ -20,7 +16,7 @@ class CustomPicklersTest extends AnyFunSuite {
   }
 
   test("point reader should return an error when JSON incorrect") {
-    val invalidJson     = "[1, 2200]"
+    val invalidJson = "[1, 2200]"
 
     read[Either[String, Point]](invalidJson) match {
       case Left(error)  => assert(error.startsWith("provided"))
@@ -39,7 +35,7 @@ class CustomPicklersTest extends AnyFunSuite {
   }
 
   test("polygon reader should return an error when JSON incorrect") {
-    val invalidJson     = """[[10000, 2000], [2, 4]]"""
+    val invalidJson = """[[10000, 2000], [2, 4]]"""
 
     read[Either[String, Polygon]](invalidJson) match {
       case Left(error)    => assert(error.startsWith("error"))
@@ -101,7 +97,6 @@ class GetEdgesTest extends AnyFunSuite {
     val expectedEdges            = List((point1, point2), (point2, point3), (point3, point1))
     val edges                    = polygon.getEdges()
 
-    assert(edges.length == polygon.points.length)
     assert(edges == expectedEdges)
   }
 }
@@ -139,10 +134,12 @@ class LocationInPolygonTest extends AnyFunSuite {
   }
 
   test("correctly determines if a location is inside any polygon") {
-    val points1  = List(Point.unsafeApply(10, 2), Point.unsafeApply(12, 5), Point.unsafeApply(12, 2))
-    val points2  = List(Point.unsafeApply(1, 2), Point.unsafeApply(3, 5), Point.unsafeApply(3, 2))
+    val points1 = List(Point.unsafeApply(10, 2), Point.unsafeApply(12, 5), Point.unsafeApply(12, 2))
+    val points2 = List(Point.unsafeApply(1, 2), Point.unsafeApply(3, 5), Point.unsafeApply(3, 2))
+
     val polygon1 = Polygon(points1)
     val polygon2 = Polygon(points2)
+
     val polygons = List(polygon1, polygon2)
 
     val locationInside    = Location(name = "inside", coordinates = Point.unsafeApply(11.5, 3))

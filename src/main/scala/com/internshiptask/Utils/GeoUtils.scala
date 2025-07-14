@@ -40,8 +40,8 @@ object GeoUtils {
     else
       edges
         .map((p1, p2) =>
-          // (yl < p1.y) != (yl < p2.y) Checks if the given location is not above or belove an edge
-          // p1.x + ((yl - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) calcuxes the intersection point,
+          // (locY < p1.y) != (locY < p2.y) Checks if the given location is not above or belove an edge
+          // p1.x + ((locY - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) calculates the intersection point,
           // then we check if the location is to the left of the intersection
           if (locY < p1.y) != (locY < p2.y) && locX < p1.x + ((locY - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x)
           then 1

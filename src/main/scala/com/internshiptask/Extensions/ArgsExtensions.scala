@@ -6,22 +6,26 @@ import os.Path
 
 object ArgsExtensions {
   extension (args: Seq[String])
-    def getInputPath(prefix: String): Either[Throwable, Path]  =
+    def getInputPathOrExit(prefix: String): Path =
       args.find(_.startsWith(prefix)) match {
-        case None        => Left(NullArgumentException(s"argument with prefix '$prefix' not found"))
+        case None        =>
+          println(s"Error: argument with prefix '$prefix' not found")
+          sys.exit(1)
         case Some(value) =>
           val path = os.pwd / "input" / value.stripPrefix(prefix)
 
-          if os.exists(path) then Right(path)
-          else Left(FileNotFoundException(s"file $path does not exist"))
+          if os.exists(path) then path
+          else
+            println(s"Error: file $path does not exist")
+            sys.exit(1)
       }
 
-    def getOutputPath(prefix: String): Either[Throwable, Path]  =
+    def getOutputPathOrExit(prefix: String): Path =
       args.find(_.startsWith(prefix)) match {
-        case None        => Left(NullArgumentException(s"argument with prefix '$prefix' not found"))
+        case None        =>
+          println(s"Error: argument with prefix '$prefix' not found")
+          sys.exit(1)
         case Some(value) =>
-          val path = os.pwd / "output" / value.stripPrefix(prefix)
-
-          Right(path)
+          os.pwd / "output" / value.stripPrefix(prefix)
       }
 }

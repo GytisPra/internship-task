@@ -15,7 +15,8 @@ object Region {
 
       val (errors, polygons) = results.partitionMap(identity)
 
-      if errors.nonEmpty then Left(s"error occured while parsing polygons: $errors")
+      if errors.nonEmpty then
+        Left(s"error occured while parsing polygons: ${errors.mkString(", ")}")
       else Right(Region(name, polygons))
     )
 
@@ -27,7 +28,8 @@ object Region {
 
       val (errors, regions) = results.partitionMap(identity)
 
-      if errors.nonEmpty then Left(s"errors occured while parsing regions: $errors")
+      if errors.nonEmpty then
+        Left(s"errors occured while parsing regions: ${errors.mkString(", ")}")
       else Right(regions.toList)
     )
 }
