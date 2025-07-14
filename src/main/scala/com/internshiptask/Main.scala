@@ -1,6 +1,4 @@
 import upickle.default.read
-import os.write as osWrite
-import os.Path
 import ujson.{Arr, Value, Obj}
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils}
