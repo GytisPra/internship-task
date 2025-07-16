@@ -4,6 +4,11 @@
 sbt "run regions=regions.json locations=locations.json output=results.json"
 ```
 
+To run tests: 
+```bash
+sbt test
+```
+
 # internship-task
 
 This is a test assignment for Scala TravelTime internship.

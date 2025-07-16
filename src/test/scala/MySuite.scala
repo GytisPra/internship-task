@@ -25,8 +25,9 @@ class CustomPicklersTest extends AnyFunSuite {
   }
 
   test("polygon reader should parse correct JSON with no errors") {
-    val validJson       = """[[1, 2], [2, 4]]"""
-    val expectedPolygon = Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4)))
+    val validJson       = """[[1, 2], [2, 4], [3, 6]]"""
+    val expectedPolygon =
+      Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4), Point.unsafeApply(3, 6)))
 
     read[Either[String, Polygon]](validJson) match {
       case Left(error)    => fail(s"Something went wrong: $error")
@@ -35,7 +36,7 @@ class CustomPicklersTest extends AnyFunSuite {
   }
 
   test("polygon reader should return an error when JSON incorrect") {
-    val invalidJson = """[[10000, 2000], [2, 4]]"""
+    val invalidJson = """[[10000, 2000], [2, 4], [3, 6]]"""
 
     read[Either[String, Polygon]](invalidJson) match {
       case Left(error)    => assert(error.startsWith("error"))
@@ -46,13 +47,13 @@ class CustomPicklersTest extends AnyFunSuite {
   test("region reader should parse correct JSON with no errors") {
     val expectedPolygons =
       List(
-        Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4))),
-        Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4)))
+        Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4), Point.unsafeApply(3, 5))),
+        Polygon(List(Point.unsafeApply(1, 2), Point.unsafeApply(2, 4), Point.unsafeApply(3, 5)))
       )
     val expectedRegion   = Region(name = "region1", polygons = expectedPolygons)
 
     val validJson =
-      """{ "name": "region1", "coordinates": [ [[1, 2], [2, 4]], [[1, 2], [2, 4]] ]}"""
+      """{ "name": "region1", "coordinates": [ [[1, 2], [2, 4], [3, 5]], [[1, 2], [2, 4], [3, 5]] ]}"""
     read[Either[String, Region]](validJson) match {
       case Left(error)   => fail(s"Something went wrong: $error")
       case Right(region) => assert(region == expectedRegion)
