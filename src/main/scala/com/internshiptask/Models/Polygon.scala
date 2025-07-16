@@ -14,6 +14,8 @@ object Polygon {
       val (errors, points) = result.partitionMap(identity)
 
       if errors.nonEmpty then Left(s"error occured while parsing polygon: ${errors.mkString(", ")}")
+      else if points.length <= 2 then
+        Left(s"invalid number of points for a given polygon (has to be > 2)")
       else Right(Polygon(points))
     )
 }
