@@ -1,11 +1,12 @@
 package com.internshiptask.Utils
 
-import com.internshiptask.Models.{Region, Result}
-import os.Path
 import upickle.default.write
+import java.io.File
+import os.Path
+
+import com.internshiptask.Models.{Region, Result}
 
 object ResultUtils {
-  def writeResults(outputPath: Path, results: List[Result]): Unit =
-    if os.exists(outputPath) then os.remove(outputPath)
-    os.write(outputPath, write[List[Result]](results))
+  def writeResults(outputFile: File, results: List[Result]): Unit =
+    os.write.over(Path(outputFile.getAbsolutePath), write[List[Result]](results))
 }

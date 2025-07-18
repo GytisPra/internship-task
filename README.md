@@ -1,7 +1,7 @@
 ### Usage
 
 ```bash
-sbt "run regions=regions.json locations=locations.json output=results.json"
+sbt "run --regions input/regions.json --locations input/locations.json --output output/results.json"
 ```
 
 To run tests: 
@@ -54,7 +54,7 @@ The result of your task should be a JSON file which list all of the regions with
 
 ### Output files:
 
-[Results](output/results.json):
+results.json:
 ```js
 [
   {

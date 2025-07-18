@@ -1,7 +1,5 @@
 package com.internshiptask.Models
 
-import com.internshiptask.Models.Polygon
-
 case class Region(val name: String, val polygons: List[Polygon])
 
 object Region {
