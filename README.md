@@ -54,7 +54,7 @@ The result of your task should be a JSON file which list all of the regions with
 
 ### Output files:
 
-[Results](output/results.json):
+results.json:
 ```js
 [
   {
