@@ -4,7 +4,6 @@ case class Point private (val x: Double, val y: Double)
 
 object Point {
   import upickle.default.{reader, Reader}
-  import ujson.{Value, Arr, Obj}
 
   implicit val pointReader: Reader[Either[String, Point]] =
     reader[(Double, Double)].map[Either[String, Point]]((long, lat) => Point(long, lat))
