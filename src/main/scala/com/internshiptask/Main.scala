@@ -1,25 +1,24 @@
 import upickle.default.read
-import ujson.{Arr, Value, Obj}
 
-import com.internshiptask.Utils.{GeoUtils, ResultUtils}
+import com.internshiptask.Utils.{GeoUtils, ResultUtils, CliParser}
 import com.internshiptask.Models.{Location, Region, Result}
-import com.internshiptask.Extensions.ArgsExtensions.{getOutputPathOrExit, getInputPathOrExit}
+import com.internshiptask.Config.ScoptConfig
 
 @main
 def main(args: String*): Unit =
-  if !os.exists(os.pwd / "output") then os.makeDir(os.pwd / "output")
+  val config = CliParser.parse(args)
 
-  val regionsPath   = args.getInputPathOrExit(prefix = "regions=")
-  val locationsPath = args.getInputPathOrExit(prefix = "locations=")
-  val outputPath    = args.getOutputPathOrExit(prefix = "output=")
+  val locationsPath = config.locationsFile.toPath
+  val regionsPath   = config.regionsFile.toPath
+  Option(config.outputFile.getParentFile).foreach(_.mkdirs())
 
-  val regions   = read[Either[String, List[Region]]](os.read(regionsPath)) match {
+  val regions   = read[Either[String, List[Region]]](regionsPath) match {
     case Left(error)    =>
       println(s"Error: $error")
       sys.exit(1)
     case Right(regions) => regions
   }
-  val locations = read[Either[String, List[Location]]](os.read(locationsPath)) match {
+  val locations = read[Either[String, List[Location]]](locationsPath) match {
     case Left(error)      =>
       println(s"Error: $error")
       sys.exit(1)
@@ -34,4 +33,4 @@ def main(args: String*): Unit =
 
   val results = Result.formatResults(regions, unformattedResults)
 
-  ResultUtils.writeResults(outputPath, results)
+  ResultUtils.writeResults(config.outputFile, results)

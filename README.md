@@ -1,7 +1,7 @@
 ### Usage
 
 ```bash
-sbt "run regions=regions.json locations=locations.json output=results.json"
+sbt "run --regions input/regions.json --locations input/locations.json --output output/results.json"
 ```
 
 To run tests: 
