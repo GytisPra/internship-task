@@ -10,7 +10,7 @@ def main(args: String*): Unit =
     case None         => sys.exit(1)
     case Some(config) => runApp(config)
 
-def runApp(config: ScoptConfig): Unit = 
+def runApp(config: ScoptConfig): Unit =
   // safe to call 'get' because the argument is required
   val locationsFile = config.locationsFile.get
   val regionsFile   = config.regionsFile.get
