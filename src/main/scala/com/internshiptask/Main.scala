@@ -2,7 +2,7 @@ import upickle.default.read
 import ujson.{Arr, Value, Obj}
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils}
-import com.internshiptask.Models.{Location, Region, Result}
+import com.internshiptask.Models.{Location, Region, Result, Point, Precision}
 import com.internshiptask.Extensions.ArgsExtensions.{getOutputPathOrExit, getInputPathOrExit}
 
 @main
@@ -25,6 +25,9 @@ def main(args: String*): Unit =
       sys.exit(1)
     case Right(locations) => locations
   }
+
+  // The precision of the location matching operations
+  given precision: Precision = Precision(1e-5)
 
   val unformattedResults = for
     region   <- regions

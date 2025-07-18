@@ -1,6 +1,6 @@
 package com.internshiptask.Models
 
-case class Point private (val x: Double, val y: Double)
+case class Point private (val x: Coordinate, val y: Coordinate)
 
 object Point {
   import upickle.default.{reader, Reader}
@@ -14,8 +14,8 @@ object Point {
       Left(s"provided longitude ($long) is more than 180 or less than -180 degrees")
     else if lat > 90 || lat < -90 then
       Left(s"provided latitude ($lat) is more than 90 or less than -90 degrees")
-    else Right(new Point(long, lat))
+    else Right(new Point(Coordinate(long), Coordinate(lat)))
 
   def unsafeApply(long: Double, lat: Double): Point =
-    new Point(long, lat)
+    new Point(Coordinate(long), Coordinate(lat))
 }

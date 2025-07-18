@@ -3,6 +3,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import com.internshiptask.Models.{Polygon, Location, Point, Region}
 import com.internshiptask.Utils.GeoUtils
+import com.internshiptask.Models.Precision
 
 class CustomPicklersTest extends AnyFunSuite {
   test("point reader should parse correct JSON with no errors") {
@@ -106,6 +107,7 @@ class LocationInPolygonTest extends AnyFunSuite {
   val (point1, point2, point3) =
     (Point.unsafeApply(1, 2), Point.unsafeApply(3, 5), Point.unsafeApply(3, 2))
   val testPolygon              = Polygon(points = List(point1, point2, point3))
+  given precision: Precision = Precision(1e-5)
 
   test("correctly determines if a location is inside a polygon") {
     val locationInside    = Location(name = "inside", coordinates = Point.unsafeApply(1.5, 2))
@@ -128,9 +130,27 @@ class LocationInPolygonTest extends AnyFunSuite {
   test("edge case where a location is on an edge of a polygon") {
     val polygonEdges = testPolygon.getEdges()
     for (p1, p2) <- polygonEdges do
-      val midPoint    = Point.unsafeApply(((p1.x + p2.x) / 2), ((p1.y + p2.y) / 2))
+      val midPoint    = Point.unsafeApply(((p1.x + p2.x).coord / 2), ((p1.y + p2.y).coord / 2))
       val location    = Location(name = "test", coordinates = midPoint)
       val isInPolygon = GeoUtils.locationInPolygon(location, testPolygon)
+      assert(isInPolygon == true)
+  }
+
+  test("should not fail if polygon has diagonal edges") {
+    val points = List(
+      Point.unsafeApply(2.5, 1.5), 
+      Point.unsafeApply(2,1), 
+      Point.unsafeApply(2.5, 0.5), 
+      Point.unsafeApply(3, 1)
+    )
+
+    val polygon = Polygon(points)
+    val polygonEdges = polygon.getEdges()
+
+    for (p1, p2) <- polygonEdges do
+      val midPoint    = Point.unsafeApply(((p1.x + p2.x).coord / 2), ((p1.y + p2.y).coord / 2))
+      val location    = Location(name = "test", coordinates = midPoint)
+      val isInPolygon = GeoUtils.locationInPolygon(location, polygon)
       assert(isInPolygon == true)
   }
 
