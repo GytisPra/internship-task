@@ -5,7 +5,7 @@ object CliParser {
   import scopt.OParser
   import java.io.File
 
-  def parse(args: Seq[String]): ScoptConfig =
+  def parse(args: Seq[String]): Option[ScoptConfig] =
     val builder = OParser.builder[ScoptConfig]
 
     val parser1 = {
@@ -16,7 +16,7 @@ object CliParser {
         opt[File]("locations")
           .required()
           .valueName("<file>")
-          .action((file, c) => c.copy(locationsFile = file))
+          .action((file, c) => c.copy(locationsFile = Some(file)))
           .validate(file =>
             if file.exists && file.isFile then success
             else failure(s"$file does not exist or is not a file")
@@ -25,7 +25,7 @@ object CliParser {
         opt[File]("regions")
           .required()
           .valueName("<file>")
-          .action((file, c) => c.copy(regionsFile = file))
+          .action((file, c) => c.copy(regionsFile = Some(file)))
           .validate(file =>
             if file.exists && file.isFile then success
             else failure(s"$file does not exist or is not a file")
@@ -34,12 +34,10 @@ object CliParser {
         opt[File]("output")
           .required()
           .valueName("<file>")
-          .action((file, c) => c.copy(outputFile = file))
+          .action((file, c) => c.copy(outputFile = Some(file)))
           .text("Path to where to output results")
       )
     }
 
-    OParser.parse(parser1, args, ScoptConfig()) match
-        case None => sys.exit(1)
-        case Some(config) => config 
+    OParser.parse(parser1, args, ScoptConfig())
 }

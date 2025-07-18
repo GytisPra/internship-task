@@ -6,19 +6,27 @@ import com.internshiptask.Config.ScoptConfig
 
 @main
 def main(args: String*): Unit =
-  val config = CliParser.parse(args)
+  CliParser.parse(args) match
+    case None         => sys.exit(1)
+    case Some(config) => runApp(config)
 
-  val locationsPath = config.locationsFile.toPath
-  val regionsPath   = config.regionsFile.toPath
-  Option(config.outputFile.getParentFile).foreach(_.mkdirs())
+def runApp(config: ScoptConfig): Unit = 
+  // safe to call 'get' because the argument is required
+  val locationsFile = config.locationsFile.get
+  val regionsFile   = config.regionsFile.get
+  val outputFile    = config.outputFile.get
 
-  val regions   = read[Either[String, List[Region]]](regionsPath) match {
+  // Make sure the output dir exists
+  // Using Option here because the parentFile can be null
+  Option(outputFile.getParentFile).foreach(_.mkdirs())
+
+  val regions   = read[Either[String, List[Region]]](regionsFile) match {
     case Left(error)    =>
       println(s"Error: $error")
       sys.exit(1)
     case Right(regions) => regions
   }
-  val locations = read[Either[String, List[Location]]](locationsPath) match {
+  val locations = read[Either[String, List[Location]]](locationsFile) match {
     case Left(error)      =>
       println(s"Error: $error")
       sys.exit(1)
@@ -33,4 +41,4 @@ def main(args: String*): Unit =
 
   val results = Result.formatResults(regions, unformattedResults)
 
-  ResultUtils.writeResults(config.outputFile, results)
+  ResultUtils.writeResults(outputFile, results)

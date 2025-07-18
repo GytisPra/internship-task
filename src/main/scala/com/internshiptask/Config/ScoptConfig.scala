@@ -3,7 +3,7 @@ package com.internshiptask.Config
 import java.io.File
 
 case class ScoptConfig(
-    locationsFile: File = File("."),
-    regionsFile: File = File("."),
-    outputFile: File = File(".")
+    locationsFile: Option[File] = None,
+    regionsFile: Option[File] = None,
+    outputFile: Option[File] = None
 )
