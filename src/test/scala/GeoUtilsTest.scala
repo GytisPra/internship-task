@@ -2,12 +2,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 import com.internshiptask.Models.{Point, Polygon, Location, Precision}
-import com.internshiptask.Utils.GeoUtils.{
-  locationInPolygon,
-  locationInPolygons,
-  isPointOnEdge,
-  isInsideBoundingBox
-}
+import com.internshiptask.Utils.GeoUtils.{locationInPolygon, locationInPolygons}
 
 class GeoUtilsTest extends AnyFunSuite with Matchers:
   val points                 = List(
