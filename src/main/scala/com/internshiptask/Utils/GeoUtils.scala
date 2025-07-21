@@ -1,8 +1,7 @@
 package com.internshiptask.Utils
 
-import com.internshiptask.Models.{Location, Polygon, Precision}
-import com.internshiptask.Models.Coordinate
-import com.internshiptask.Models.Point
+import com.internshiptask.Models.{Location, Polygon, Precision, Point, Coordinate}
+import com.internshiptask.Models.Coordinate.{min, max}
 
 object GeoUtils {
 
@@ -36,25 +35,32 @@ object GeoUtils {
     val edges        = polygon.getEdges()
     val (locX, locY) = (location.coordinates.x, location.coordinates.y)
 
-    if edges.exists((p1, p2) => isPointOnEdge(locY, locX, p1, p2))
+    if !isInsideBoundingBox(locY, locX, polygon.points) then false
+    else if edges.exists(isPointOnEdge(location.coordinates, _))
     then true
     else
       edges
         .map((p1, p2) =>
-          // (locY < p1.y) != (locY < p2.y) Checks if the given location is not above or belove an edge
-          // p1.x + ((locY - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x) calculates the intersection point,
+          // (locY < y1) != (locY < y2) Checks if the given location is not above or belove an edge
+          // x1 + ((locY - y1) / (y2 - y1)) * (x2 - x1) calculates the intersection point,
           // then we check if the location is to the left of the intersection
-          if (locY < p1.y) != (locY < p2.y) && locX < p1.x + ((locY - p1.y) / (p2.y - p1.y)) * (p2.x - p1.x)
-          then 1
+          val (x1, y1, x2, y2) = (p1.x, p1.y, p2.x, p2.y)
+          if (locY < y1) != (locY < y2) && locX < x1 + ((locY - y1) / (y2 - y1)) * (x2 - x1) then 1
           else 0
         )
         .sum % 2 == 1
 
-  def isPointOnEdge(locY: Coordinate, locX: Coordinate, p1: Point, p2: Point)(using precision: Precision): Boolean =
-    val minX = if p1.x > p2.x then p2.x else p1.x
-    val maxX = if p1.x > p2.x then p1.x else p2.x
-    val minY = if p1.y > p2.y then p2.y else p1.y
-    val maxY = if p1.y > p2.y then p1.y else p2.y
+  def isPointOnEdge(locationCoords: Point, edge: (Point, Point))(using
+      precision: Precision
+  ): Boolean =
+    val (locX, locY) = (locationCoords.x, locationCoords.y)
+    val (p1, p2)     = (edge._1, edge._2)
+
+    val minX = min(p1.x, p2.x)
+    val minY = min(p1.y, p2.y)
+
+    val maxX = max(p1.x, p2.x)
+    val maxY = max(p1.y, p2.y)
 
     // this checks if we are inside the bounding box
     if locY >= minY && locY <= maxY && locX >= minX && locX <= maxX then
@@ -67,4 +73,17 @@ object GeoUtils {
 
         a * locX + b ~= locY
     else false
+
+  def isInsideBoundingBox(locY: Coordinate, locX: Coordinate, polygonPoints: List[Point])(using
+      precision: Precision
+  ): Boolean =
+    val allX = polygonPoints.map(_.x)
+    val allY = polygonPoints.map(_.y)
+
+    val maxY = allY.max
+    val maxX = allX.max
+    val minY = allY.min
+    val minX = allX.min
+
+    locX >= minX && locX <= maxX && locY >= minY && locY <= maxY
 }

@@ -27,7 +27,7 @@ def main(args: String*): Unit =
   }
 
   // The precision of the location matching operations
-  given precision: Precision = Precision(1e-5)
+  given precision: Precision = Precision(1e-8)
 
   val unformattedResults = for
     region   <- regions
