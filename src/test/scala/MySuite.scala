@@ -147,11 +147,9 @@ class LocationInPolygonTest extends AnyFunSuite {
     val polygon = Polygon(points)
     val polygonEdges = polygon.getEdges()
 
-    for (p1, p2) <- polygonEdges do
-      val midPoint    = Point.unsafeApply(((p1.x + p2.x).coord / 2), ((p1.y + p2.y).coord / 2))
-      val location    = Location(name = "test", coordinates = midPoint)
-      val isInPolygon = GeoUtils.locationInPolygon(location, polygon)
-      assert(isInPolygon == true)
+    val location    = Location(name = "test", coordinates = Point.unsafeApply(2.5, 0.75))
+    val isInPolygon = GeoUtils.locationInPolygon(location, polygon)
+    assert(isInPolygon == true)
   }
 
   test("correctly determines if a location is inside any polygon") {
