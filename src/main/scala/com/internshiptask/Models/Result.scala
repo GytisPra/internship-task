@@ -10,6 +10,6 @@ object Result {
       unformattedResults: List[(String, String)]
   ): List[Result] =
     val groupedResults = unformattedResults.groupMap(_._1)(_._2)
-    
+
     regions.map(region => Result(region.name, groupedResults.getOrElse(region.name, List())))
 }

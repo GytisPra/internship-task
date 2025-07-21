@@ -107,7 +107,7 @@ class LocationInPolygonTest extends AnyFunSuite {
   val (point1, point2, point3) =
     (Point.unsafeApply(1, 2), Point.unsafeApply(3, 5), Point.unsafeApply(3, 2))
   val testPolygon              = Polygon(points = List(point1, point2, point3))
-  given precision: Precision = Precision(1e-5)
+  given precision: Precision   = Precision(1e-5)
 
   test("correctly determines if a location is inside a polygon") {
     val locationInside    = Location(name = "inside", coordinates = Point.unsafeApply(1.5, 2))
@@ -138,13 +138,13 @@ class LocationInPolygonTest extends AnyFunSuite {
 
   test("should not fail if polygon has diagonal edges") {
     val points = List(
-      Point.unsafeApply(2.5, 1.5), 
-      Point.unsafeApply(2,1), 
-      Point.unsafeApply(2.5, 0.5), 
+      Point.unsafeApply(2.5, 1.5),
+      Point.unsafeApply(2, 1),
+      Point.unsafeApply(2.5, 0.5),
       Point.unsafeApply(3, 1)
     )
 
-    val polygon = Polygon(points)
+    val polygon      = Polygon(points)
     val polygonEdges = polygon.getEdges()
 
     val location    = Location(name = "test", coordinates = Point.unsafeApply(2.5, 0.75))
