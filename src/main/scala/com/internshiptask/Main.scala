@@ -1,6 +1,5 @@
 import upickle.default.read
 import com.typesafe.scalalogging.Logger
-import scala.util.{Failure, Success}
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils, CliParser}
 import com.internshiptask.Models.{Location, Region, Result}
