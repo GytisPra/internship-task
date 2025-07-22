@@ -1,5 +1,7 @@
 package com.internshiptask.Utils
 
+import os.Path
+
 object CliParser {
   import com.internshiptask.Config.ScoptConfig
   import scopt.OParser

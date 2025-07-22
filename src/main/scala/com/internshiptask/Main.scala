@@ -1,4 +1,6 @@
 import upickle.default.read
+import com.typesafe.scalalogging.Logger
+import scala.util.{Failure, Success}
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils, CliParser}
 import com.internshiptask.Models.{Location, Region, Result}
@@ -6,11 +8,17 @@ import com.internshiptask.Config.ScoptConfig
 
 @main
 def main(args: String*): Unit =
-  CliParser.parse(args) match
+  val logger: Logger = Logger("InternshipTaskLogger")
+
+  val results = CliParser.parse(args) match
     case None         => sys.exit(1)
     case Some(config) => runApp(config)
 
-def runApp(config: ScoptConfig): Unit =
+  results match
+    case Left(error) => logger.error(error)
+    case Right(_)    => sys.exit(0)
+
+def runApp(config: ScoptConfig): Either[String, Unit] =
   // safe to call 'get' because the argument is required
   val locationsFile = config.locationsFile.get
   val regionsFile   = config.regionsFile.get
@@ -20,25 +28,16 @@ def runApp(config: ScoptConfig): Unit =
   // Using Option here because the parentFile can be null
   Option(outputFile.getParentFile).foreach(_.mkdirs())
 
-  val regions   = read[Either[String, List[Region]]](regionsFile) match {
-    case Left(error)    =>
-      println(s"Error: $error")
-      sys.exit(1)
-    case Right(regions) => regions
-  }
-  val locations = read[Either[String, List[Location]]](locationsFile) match {
-    case Left(error)      =>
-      println(s"Error: $error")
-      sys.exit(1)
-    case Right(locations) => locations
-  }
+  for 
+    regions <- read[Either[String, List[Region]]](regionsFile)
+    locations <- read[Either[String, List[Location]]](locationsFile)
+  yield
+    val unformattedResults = for
+      region   <- regions
+      location <- locations
+      if GeoUtils.locationInPolygons(location, region.polygons)
+    yield (region.name, location.name)
 
-  val unformattedResults = for
-    region   <- regions
-    location <- locations
-    if GeoUtils.locationInPolygons(location, region.polygons)
-  yield (region.name, location.name)
+    val results = Result.formatResults(regions, unformattedResults)
 
-  val results = Result.formatResults(regions, unformattedResults)
-
-  ResultUtils.writeResults(outputFile, results)
+    ResultUtils.writeResults(outputFile, results)

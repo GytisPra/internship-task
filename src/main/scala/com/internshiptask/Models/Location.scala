@@ -24,7 +24,7 @@ object Location {
       val (errors, locations) = results.partitionMap(identity)
 
       if errors.nonEmpty then
-        Left(s"errors occured while parsing locations: ${errors.mkString(", ")}")
+        Left(errors.mkString(", "))
       else Right(locations.toList)
     )
 }
