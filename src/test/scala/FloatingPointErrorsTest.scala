@@ -1,7 +1,7 @@
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import com.internshiptask.Models.Precision
-import com.internshiptask.Models.Coordinate
+
+import com.internshiptask.Models.{Coordinate, Precision}
 
 class FloatingPointErrorsTest extends AnyFunSuite with Matchers:
 
