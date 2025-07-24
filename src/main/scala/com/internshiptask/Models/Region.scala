@@ -10,7 +10,7 @@ object Region {
     reader[Value].map[Either[String, Region]](json =>
       val name        = json("name").str
       val coordinates = json("coordinates").arr
-      
+
       if name.isBlank then Left("name of a region is blank")
       else if coordinates.isEmpty then Left(s"$name has no polygons")
       else
@@ -18,8 +18,7 @@ object Region {
 
         val (errors, polygons) = results.partitionMap(identity)
 
-        if errors.nonEmpty then
-          Left(errors.mkString(", "))
+        if errors.nonEmpty then Left(errors.mkString(", "))
         else Right(Region(name, polygons))
     )
 
@@ -30,7 +29,7 @@ object Region {
       val (errors, regions) = results.partitionMap(identity)
 
       if errors.nonEmpty then
-        Left(errors.mkString(", "))
+        Left(s"Errors occured while parsing regions: ${errors.mkString(", ")}")
       else Right(regions.toList)
     )
 }

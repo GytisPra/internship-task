@@ -1,5 +1,7 @@
 import upickle.default.read
 import com.typesafe.scalalogging.Logger
+import scala.util.{Try, Failure, Success}
+import java.io.File
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils, CliParser}
 import com.internshiptask.Models.{Location, Region, Result}
@@ -7,29 +9,23 @@ import com.internshiptask.Config.ScoptConfig
 
 @main
 def main(args: String*): Unit =
-  val logger: Logger = Logger("InternshipTaskLogger")
+  given logger: Logger = Logger("InternshipTaskLogger")
 
-  val results = CliParser.parse(args) match
-    case None         => sys.exit(1)
-    case Some(config) => runApp(config)
-
-  results match
-    case Left(error) => logger.error(error)
-    case Right(_)    => sys.exit(0)
+  CliParser.parse(args) match
+    case Left(error)   => logger.error(error)
+    case Right(config) =>
+      runApp(config) match
+        case Left(error) => logger.error(error)
+        case Right(_)    => logger.info(s"Output saved to ${config.outputFile.getAbsolutePath}")
 
 def runApp(config: ScoptConfig): Either[String, Unit] =
-  // safe to call 'get' because the argument is required
-  val locationsFile = config.locationsFile.get
-  val regionsFile   = config.regionsFile.get
-  val outputFile    = config.outputFile.get
+  val locationsFile = config.locationsFile
+  val regionsFile   = config.regionsFile
+  val outputFile    = config.outputFile
 
-  // Make sure the output dir exists
-  // Using Option here because the parentFile can be null
-  Option(outputFile.getParentFile).foreach(_.mkdirs())
-
-  for 
-    regions <- read[Either[String, List[Region]]](regionsFile)
-    locations <- read[Either[String, List[Location]]](locationsFile)
+  for
+    regions   <- readRegionsJson(regionsFile)
+    locations <- readLocationsJson(locationsFile)
   yield
     val unformattedResults = for
       region   <- regions
@@ -40,3 +36,13 @@ def runApp(config: ScoptConfig): Either[String, Unit] =
     val results = Result.formatResults(regions, unformattedResults)
 
     ResultUtils.writeResults(outputFile, results)
+
+def readLocationsJson(file: File): Either[String, List[Location]] =
+  Try(read[Either[String, List[Location]]](file)) match
+    case Failure(e)       => Left(s"Error occured while parsing ${file.getName}: ${e.getMessage}")
+    case Success(results) => results
+
+def readRegionsJson(file: File): Either[String, List[Region]] =
+  Try(read[Either[String, List[Region]]](file)) match
+    case Failure(e)       => Left(s"Error occured while parsing ${file.getName}: ${e.getMessage}")
+    case Success(results) => results
