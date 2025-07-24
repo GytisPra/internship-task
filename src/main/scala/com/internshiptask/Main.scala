@@ -2,7 +2,7 @@ import upickle.default.read
 import ujson.{Arr, Value, Obj}
 
 import com.internshiptask.Utils.{GeoUtils, ResultUtils}
-import com.internshiptask.Models.{Location, Region, Result, Point, Precision}
+import com.internshiptask.Models.{Location, Region, Result, Precision}
 import com.internshiptask.Extensions.ArgsExtensions.{getOutputPathOrExit, getInputPathOrExit}
 
 @main
