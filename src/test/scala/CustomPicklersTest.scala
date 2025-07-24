@@ -25,7 +25,7 @@ class CustomPicklersTest extends AnyFunSuite with Matchers {
     }
   }
 
-  // ---------------------- Polgon custom pickler tests ---------------
+  // ---------------------- Polygon custom pickler tests ---------------
   test("polygon reader should parse correct JSON with no errors") {
     val validJson       = """[[1, 2], [2, 4], [3, 6]]"""
     val expectedPolygon =

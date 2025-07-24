@@ -2,7 +2,8 @@ import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
 import com.internshiptask.Models.{Point, Polygon, Location, Precision}
-import com.internshiptask.Utils.GeoUtils.{locationInPolygon, locationInPolygons}
+import com.internshiptask.Utils.GeoUtils
+import com.internshiptask.Models.Coordinate
 
 class GeoUtilsTest extends AnyFunSuite with Matchers:
   val points                 = List(
@@ -18,8 +19,8 @@ class GeoUtilsTest extends AnyFunSuite with Matchers:
     val locationInside    = Location(name = "inside", coordinates = Point.unsafeApply(2, 1))
     val locationNotInside = Location(name = "outside", coordinates = Point.unsafeApply(10, 10))
 
-    val isInPolygon    = locationInPolygon(locationInside, testPolygon)
-    val isNotInPolygon = locationInPolygon(locationNotInside, testPolygon)
+    val isInPolygon    = GeoUtils.locationInPolygon(locationInside, testPolygon)
+    val isNotInPolygon = GeoUtils.locationInPolygon(locationNotInside, testPolygon)
 
     withClue(s"failed for location ${locationInside.coordinates}, when polygon was $testPolygon") {
       isInPolygon shouldBe true
@@ -34,7 +35,7 @@ class GeoUtilsTest extends AnyFunSuite with Matchers:
   test("location on polygon point should be considered inside") {
     for point <- testPolygon.points do
       val location    = Location(name = "test", coordinates = point)
-      val isInPolygon = locationInPolygon(location, testPolygon)
+      val isInPolygon = GeoUtils.locationInPolygon(location, testPolygon)
       withClue(
         s"failed at point ${location.coordinates} when polygon was ${testPolygon}: "
       ) {
@@ -47,7 +48,7 @@ class GeoUtilsTest extends AnyFunSuite with Matchers:
     for (p1, p2) <- polygonEdges do
       val midPoint = Point.unsafeApply(((p1.x + p2.x).coord / 2), ((p1.y + p2.y).coord / 2))
       val location = Location(name = "test", coordinates = midPoint)
-      val isOnEdge = locationInPolygon(location, testPolygon)
+      val isOnEdge = GeoUtils.locationInPolygon(location, testPolygon)
       withClue(s"failed at point ${location.coordinates} when edge was ${(p1, p2)}: ") {
         isOnEdge shouldBe true
       }
@@ -65,9 +66,59 @@ class GeoUtilsTest extends AnyFunSuite with Matchers:
     val locationInside    = Location(name = "inside", coordinates = Point.unsafeApply(11.5, 3))
     val locationNotInside = Location(name = "outside", coordinates = Point.unsafeApply(80, 80))
 
-    val isInPolygon    = locationInPolygons(locationInside, polygons)
-    val isNotInPolygon = locationInPolygons(locationNotInside, polygons)
+    val isInPolygon    = GeoUtils.locationInPolygons(locationInside, polygons)
+    val isNotInPolygon = GeoUtils.locationInPolygons(locationNotInside, polygons)
 
     isInPolygon shouldBe true
     isNotInPolygon shouldBe false
+  }
+
+  test("should correctly determine that a point is on an edge") {
+    val edge = (Point.unsafeApply(0,0), Point.unsafeApply(4,4))
+    val point = Point.unsafeApply(2,2)
+
+    withClue(s"failed when point was $point and edge was $edge") {
+      GeoUtils.isPointOnEdge(point, edge) shouldBe true
+    }
+  }
+
+  test("should correctly determine that a point is not on an edge") {
+    val edge = (Point.unsafeApply(0,0), Point.unsafeApply(4,4))
+    val point = Point.unsafeApply(3,2)
+
+    withClue(s"failed when point was $point and edge was $edge") {
+      GeoUtils.isPointOnEdge(point, edge) shouldBe false
+    }
+  }
+
+  test("should correctly determine that a point is inside a bounding box") {
+    val polygon = Polygon(
+      List(
+        Point.unsafeApply(15,5),
+        Point.unsafeApply(20,10),
+        Point.unsafeApply(25,5),
+        Point.unsafeApply(20,0),
+      )
+    )
+    val point = Point.unsafeApply(16,9)
+
+    withClue(s"failed when point was $point and polygon was $polygon") {
+      GeoUtils.isPointInsideBoundingBox(point, polygon.points) shouldBe true
+    }
+  }
+
+  test("should correctly determine that a point is not inside a bounding box") {
+    val polygon = Polygon(
+      List(
+        Point.unsafeApply(15,5),
+        Point.unsafeApply(20,10),
+        Point.unsafeApply(25,5),
+        Point.unsafeApply(20,0),
+      )
+    )
+    val point = Point.unsafeApply(14,11)
+
+    withClue(s"failed when point was $point and polygon was $polygon") {
+      GeoUtils.isPointInsideBoundingBox(point, polygon.points) shouldBe false
+    }
   }

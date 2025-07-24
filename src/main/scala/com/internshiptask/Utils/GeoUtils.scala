@@ -35,7 +35,7 @@ object GeoUtils {
     val edges        = polygon.getEdges()
     val (locX, locY) = (location.coordinates.x, location.coordinates.y)
 
-    if !isInsideBoundingBox(locY, locX, polygon.points) then false
+    if !isPointInsideBoundingBox(location.coordinates, polygon.points) then false
     else if edges.exists(isPointOnEdge(location.coordinates, _))
     then true
     else
@@ -50,10 +50,10 @@ object GeoUtils {
         )
         .sum % 2 == 1
 
-  def isPointOnEdge(locationCoords: Point, edge: (Point, Point))(using
+  def isPointOnEdge(point: Point, edge: (Point, Point))(using
       precision: Precision
   ): Boolean =
-    val (locX, locY) = (locationCoords.x, locationCoords.y)
+    val (locX, locY) = (point.x, point.y)
     val (p1, p2)     = (edge._1, edge._2)
 
     val minX = min(p1.x, p2.x)
@@ -74,11 +74,12 @@ object GeoUtils {
         a * locX + b ~= locY
     else false
 
-  def isInsideBoundingBox(locY: Coordinate, locX: Coordinate, polygonPoints: List[Point])(using
+  def isPointInsideBoundingBox(point: Point, polygonPoints: List[Point])(using
       precision: Precision
   ): Boolean =
-    val allX = polygonPoints.map(_.x)
-    val allY = polygonPoints.map(_.y)
+    val (locX, locY) = (point.x, point.y)
+    val allX         = polygonPoints.map(_.x)
+    val allY         = polygonPoints.map(_.y)
 
     val maxY = allY.max
     val maxX = allX.max
