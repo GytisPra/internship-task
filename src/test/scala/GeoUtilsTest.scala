@@ -3,7 +3,6 @@ import org.scalatest.matchers.should.Matchers
 
 import com.internshiptask.Models.{Point, Polygon, Location, Precision}
 import com.internshiptask.Utils.GeoUtils
-import com.internshiptask.Models.Coordinate
 
 class GeoUtilsTest extends AnyFunSuite with Matchers:
   val points                 = List(
@@ -46,7 +45,7 @@ class GeoUtilsTest extends AnyFunSuite with Matchers:
   test("location on polygon edge should be considered inside") {
     val polygonEdges = testPolygon.getEdges()
     for (p1, p2) <- polygonEdges do
-      val midPoint = Point.unsafeApply(((p1.x + p2.x).coord / 2), ((p1.y + p2.y).coord / 2))
+      val midPoint = Point.unsafeApply(((p1.x + p2.x).value / 2), ((p1.y + p2.y).value / 2))
       val location = Location(name = "test", coordinates = midPoint)
       val isOnEdge = GeoUtils.locationInPolygon(location, testPolygon)
       withClue(s"failed at point ${location.coordinates} when edge was ${(p1, p2)}: ") {

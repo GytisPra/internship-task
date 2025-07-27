@@ -1,7 +1,7 @@
 package com.internshiptask.Utils
 
-import com.internshiptask.Models.{Location, Polygon, Precision, Point, Coordinate}
-import com.internshiptask.Models.Coordinate.{min, max}
+import com.internshiptask.Models.{Location, Polygon, Precision, Point}
+import com.internshiptask.Models.PointComponent.{min, max}
 
 object GeoUtils {
 
